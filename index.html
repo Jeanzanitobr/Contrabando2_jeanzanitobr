@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TrazaFiscal Puno</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef2f7;--card:#fff;--tx:#14233b;--mut:#5b6b82;--ac:#1d3a63;--ok:#1f8f5f;--wa:#c98a00;--bad:#c0392b;--bd:#d5dde8;--lake:#bcd6ee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1724;--card:#17223a;--tx:#e6edf7;--mut:#9fb0c7;--ac:#7fb0ee;--ok:#41c68c;--wa:#e8b43a;--bad:#ef6b5b;--bd:#2b3a56;--lake:#1e3a5c}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1724;--card:#17223a;--tx:#e6edf7;--mut:#9fb0c7;--ac:#7fb0ee;--ok:#41c68c;--wa:#e8b43a;--bad:#ef6b5b;--bd:#2b3a56;--lake:#1e3a5c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px}
+header{padding:14px 16px 6px}
+h1{margin:0;font-size:20px;color:var(--ac)}
+header p{margin:2px 0 0;color:var(--mut);font-size:13px}
+nav{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+nav button{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:20px;font-size:14px;white-space:nowrap;cursor:pointer}
+nav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+main{padding:8px 16px 28px;max-width:960px;margin:auto}
+section{display:none}section.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.card b{display:block;font-size:22px;color:var(--ac)}
+.card span{font-size:12px;color:var(--mut)}
+h2{font-size:16px;margin:14px 0 8px}
+svg{width:100%;height:auto;border-radius:12px;border:1px solid var(--bd)}
+canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--bd);background:#222}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+.tag{padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;color:#fff}
+.alto{background:var(--bad)}.medio{background:var(--wa)}.bajo{background:var(--ok)}
+.al{border-left:4px solid var(--bad);padding:8px 10px;margin-bottom:6px;background:var(--card);border-radius:8px;font-size:13px}
+.al.medio{border-color:var(--wa)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+button.pri{background:var(--ac);color:var(--bg);border:0;padding:9px 16px;border-radius:8px;font-size:14px;cursor:pointer}
+textarea{width:100%;min-height:260px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px;font-family:ui-monospace,monospace;font-size:12px}
+small{color:var(--mut)}
+</style></head><body>
+<header><h1>TrazaFiscal Puno</h1><p>Trazabilidad contable y fiscal · frontera Puno–Bolivia · demo académica</p></header>
+<nav id="nav"></nav>
+<main>
+<section id="s0" class="on">
+ <div class="grid">
+  <div class="card"><b id="m1">0</b><span>Vehículos detectados</span></div>
+  <div class="card"><b id="m2">0</b><span>Alertas</span></div>
+  <div class="card"><b id="m3">US$ 0</b><span>Mercancía sin sustento</span></div>
+  <div class="card"><b id="m4">US$ 0</b><span>Impuesto omitido</span></div>
+ </div>
+ <h2>Mapa de control (esquemático)</h2>
+ <svg viewBox="0 0 600 300" role="img" aria-label="Mapa esquemático de puestos de control">
+  <rect width="600" height="300" fill="var(--card)"/>
+  <ellipse cx="400" cy="120" rx="150" ry="80" fill="var(--lake)"/>
+  <text x="400" y="124" text-anchor="middle" font-size="13" fill="var(--mut)">Lago Titicaca</text>
+  <path d="M60 250 L230 200 L330 235 L470 215 L560 250" stroke="var(--mut)" stroke-dasharray="5 4" fill="none"/>
+  <text x="90" y="285" font-size="11" fill="var(--mut)">Frontera con Bolivia (referencial)</text>
+  <g id="posts"></g>
+ </svg>
+ <h2>Alertas en vivo</h2><div id="alerts"><small>Sin alertas todavía. Abre la pestaña Cámara.</small></div>
+</section>
+<section id="s1">
+ <canvas id="cv" width="640" height="360"></canvas>
+ <div class="row">
+  <button class="pri" id="bp">Pausar</button>
+  <label><input type="checkbox" id="night"> Modo nocturno</label>
+  <select id="post"></select>
+ </div>
+ <small>Simulación visual del módulo YOLO + OCR/ANPR. La detección real corre con el script Python incluido.</small>
+</section>
+<section id="s2">
+ <h2>Cruce contable: placa / RUC vs facturas y guías</h2>
+ <div class="tw"><table><thead><tr><th>Hora</th><th>Puesto</th><th>Placa</th><th>RUC</th><th>Documento</th><th>Valor</th><th>Riesgo</th><th>Imp. omitido</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <small>Impuesto omitido = monto sin sustento × (IGV+IPM 18 % + arancel 6 %). Tasas de ejemplo.</small>
+</section>
+<section id="s3">
+ <div class="row"><button class="pri" id="rep">Generar reporte</button><button class="pri" id="cp">Copiar</button></div>
+ <textarea id="ta" readonly></textarea>
+</section>
+</main>
+<script>
+var TABS=["Panel","Cámara","Cruce contable","Reporte"],POSTS=[{n:"Desaguadero",x:120,y:230},{n:"Kasani",x:330,y:225},{n:"Yunguyo",x:300,y:150},{n:"Puno",x:420,y:70}];
+var POOL=[
+{p:"ABC-123",ruc:"20512345678",doc:"Factura + guía",v:12000,s:0},
+{p:"V4K-882",ruc:"20601122334",doc:"Sin comprobante",v:20000,s:60},
+{p:"B7T-405",ruc:"10456789012",doc:"Sin comprobante",v:8500,s:60},
+{p:"C2M-319",ruc:"20498765432",doc:"Factura sin guía",v:15000,s:35},
+{p:"D9X-731",ruc:"20555566677",doc:"Factura + guía",v:9000,s:0}];
+var ev=[],veh=[],paused=false,last=0,nav=document.getElementById("nav"),cv=document.getElementById("cv"),cx=cv.getContext("2d");
+TABS.forEach(function(t,i){var b=document.createElement("button");b.textContent=t;b.onclick=function(){show(i)};nav.appendChild(b)});
+function show(i){document.querySelectorAll("section").forEach(function(s,k){s.classList.toggle("on",k==i)});nav.querySelectorAll("button").forEach(function(b,k){b.classList.toggle("on",k==i)})}
+show(0);
+var sel=document.getElementById("post");POSTS.forEach(function(p,i){sel.add(new Option(p.n,i))});
+function nivel(s){return s>=60?"alto":s>=30?"medio":"bajo"}
+function money(n){return "US$ "+n.toLocaleString("en-US")}
+function spawn(){var d=POOL[Math.floor(Math.random()*POOL.length)],c=["#c9d6e8","#e0c9a6","#b8d8c4","#d9b8b8"];
+ veh.push({d:d,x:-120,y:210+Math.random()*50,sp:1.4+Math.random(),col:c[Math.floor(Math.random()*4)],done:false,conf:(0.86+Math.random()*0.12)})}
+function register(v){v.done=true;var n=document.getElementById("night").checked,s=Math.min(100,v.d.s+(n?25:0)),imp=v.d.doc=="Sin comprobante"?Math.round(v.d.v*0.24):0,pi=+sel.value;
+ ev.unshift({t:new Date().toLocaleTimeString("es-PE"),post:pi,p:v.d.p,ruc:v.d.ruc,doc:v.d.doc,v:v.d.v,s:s,imp:imp,n:n});render()}
+function render(){
+ var al=ev.filter(function(e){return e.s>=30}),base=0,imp=0;
+ ev.forEach(function(e){if(e.doc=="Sin comprobante")base+=e.v;imp+=e.imp});
+ document.getElementById("m1").textContent=ev.length;document.getElementById("m2").textContent=al.length;
+ document.getElementById("m3").textContent=money(base);document.getElementById("m4").textContent=money(imp);
+ document.getElementById("alerts").innerHTML=al.slice(0,6).map(function(e){return '<div class="al '+nivel(e.s)+'"><b>'+e.p+'</b> en '+POSTS[e.post].n+' · '+e.doc+(e.n?' · cruce nocturno':'')+' · riesgo '+e.s+'/100</div>'}).join("")||"<small>Sin alertas todavía.</small>";
+ document.getElementById("tb").innerHTML=ev.slice(0,30).map(function(e){return "<tr><td>"+e.t+"</td><td>"+POSTS[e.post].n+"</td><td>"+e.p+"</td><td>"+e.ruc+"</td><td>"+e.doc+"</td><td>"+money(e.v)+'</td><td><span class="tag '+nivel(e.s)+'">'+e.s+"</span></td><td>"+money(e.imp)+"</td></tr>"}).join("");
+ document.getElementById("posts").innerHTML=POSTS.map(function(p,i){var m=0;ev.forEach(function(e){if(e.post==i&&e.s>m)m=e.s});var c=m>=60?"var(--bad)":m>=30?"var(--wa)":"var(--ok)";
+  return '<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="'+c+'"/><text x="'+(p.x+14)+'" y="'+(p.y+4)+'" font-size="12" fill="var(--tx)">'+p.n+"</text>"}).join("")}
+function draw(ts){
+ if(!paused){if(ts-last>3200){spawn();last=ts}veh.forEach(function(v){v.x+=v.sp;if(!v.done&&v.x>300)register(v)});veh=veh.filter(function(v){return v.x<700})}
+ var night=document.getElementById("night").checked;
+ cx.fillStyle=night?"#0b1018":"#8aa07a";cx.fillRect(0,0,640,360);
+ cx.fillStyle=night?"#1a1f29":"#555";cx.fillRect(0,190,640,110);
+ cx.strokeStyle="#ddd";cx.setLineDash([20,16]);cx.beginPath();cx.moveTo(0,245);cx.lineTo(640,245);cx.stroke();cx.setLineDash([]);
+ veh.forEach(function(v){var w=110,h=48,y=v.y-h;
+  cx.fillStyle=v.col;cx.fillRect(v.x,y,w,h);cx.fillStyle="#334";cx.fillRect(v.x+w-22,y+6,22,20);
+  cx.fillStyle="#111";cx.beginPath();cx.arc(v.x+22,v.y,8,0,7);cx.arc(v.x+w-20,v.y,8,0,7);cx.fill();
+  if(v.x>120){var c=nivel(v.d.s+(night?25:0)),col=c=="alto"?"#e04b3a":c=="medio"?"#e8b43a":"#2fbf7a";
+   cx.strokeStyle=col;cx.lineWidth=3;cx.strokeRect(v.x-4,y-4,w+8,h+8);
+   cx.fillStyle=col;cx.fillRect(v.x-4,y-24,150,20);cx.fillStyle="#000";cx.font="bold 12px sans-serif";
+   cx.fillText("camión "+(v.conf*100).toFixed(0)+"%  "+v.d.p,v.x,y-9);
+   cx.fillStyle="#fff";cx.fillRect(v.x+30,v.y-18,52,13);cx.fillStyle="#000";cx.font="9px monospace";cx.fillText(v.d.p,v.x+33,v.y-8)}});
+ cx.fillStyle="#fff";cx.font="12px monospace";cx.fillText("CAM-01 · "+POSTS[+sel.value].n+(night?" · IR":""),10,20);
+ requestAnimationFrame(draw)}
+document.getElementById("bp").onclick=function(){paused=!paused;this.textContent=paused?"Reanudar":"Pausar"};
+document.getElementById("rep").onclick=function(){
+ var base=0,imp=0,al=0;ev.forEach(function(e){if(e.doc=="Sin comprobante")base+=e.v;imp+=e.imp;if(e.s>=30)al++});
+ var t="REPORTE TRAZAFISCAL PUNO\nFecha: "+new Date().toLocaleString("es-PE")+"\nDestino: SUNAT / Aduanas\n\nVehículos registrados: "+ev.length+"\nAlertas: "+al+"\nMercancía sin sustento: "+money(base)+"\nImpuesto omitido estimado: "+money(imp)+"\n\nDETALLE\n";
+ ev.forEach(function(e){t+=e.t+" | "+POSTS[e.post].n+" | "+e.p+" | RUC "+e.ruc+" | "+e.doc+" | riesgo "+e.s+" | "+money(e.imp)+"\n"});
+ document.getElementById("ta").value=t+"\nCifras de demostración con fines académicos."};
+document.getElementById("cp").onclick=function(){var t=document.getElementById("ta");t.select();try{navigator.clipboard.writeText(t.value)}catch(e){}};
+render();requestAnimationFrame(draw);
+</script></body></html>
